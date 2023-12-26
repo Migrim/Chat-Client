@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat App</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="dark-mode">
+    <div class="chat-container">
+        <div class="sidebar">
+            <div class="active-users">
+                <h2>Active Users:</h2>
+                <ul id="user-list">
+                    <!-- Active users will be listed here -->
+                </ul>
+            </div>
+            <div class="sidebar-menu">
+                <button>Start new Private Chat</button>
+                <button>Settings</button>
+                <button>Gallery</button>
+                <button onclick="location.href='/logout'" class="logout-button">Logout</button>
+            </div>
+        </div>
+        <div class="chat-box">
+            <div class="messages" id="messages">
+                <!-- Messages will appear here -->
+            </div>
+            <div class="message-input">
+                <input id="myMessage" autocomplete="off" placeholder="Type here to send a message">
+                <button onclick="sendMessage()">Send</button>
+            </div>
+        </div>
+        <div class="image-board">
+            <h2>Image Board</h2>
+            <div id="image-gallery">
+                <!-- Pictures here -->
+            </div>
+            <input type="file" id="image-upload">
+            <button onclick="uploadImage()">Upload</button>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.0/socket.io.js"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
