@@ -84,7 +84,7 @@ def handle_connect():
     if current_user.is_authenticated:
         online_users[current_user.username] = True
         emit_active_users()
-        emit_recent_messages(current_user.username)  
+        emit_recent_messages(current_user.username)
         msg = f"{current_user.username} connected!"
     else:
         msg = "Guest connected!"
@@ -96,6 +96,11 @@ def handle_connect():
     }
 
     emit('system_message', system_message)
+
+@socketio.on('request_recent_messages')
+@login_required
+def handle_request_recent_messages(username):
+    emit_recent_messages(username)
 
 @socketio.on('disconnect')
 def handle_disconnect():
@@ -134,6 +139,30 @@ def handle_user_active(data):
         db.session.commit()
         emit_active_users()
 
+@app.route("/delete_message/<int:message_id>", methods=['POST'])
+@login_required
+def delete_message(message_id):
+    message = Message.query.get(message_id)
+    if message.user_id == current_user.id:  
+        db.session.delete(message)
+        db.session.commit()
+        emit('message_deleted', {'message_id': message_id}, broadcast=True)
+    return redirect(url_for('index'))
+
+@socketio.on('delete_message')
+@login_required
+def handle_delete_message(json):
+    message_id = json.get('message_id')
+    message = Message.query.get(message_id)
+    if message and message.user_id == current_user.id:
+        message.content = "Deleted"  
+        db.session.commit()
+        
+        emit('message_deleted', {'message_id': message_id}, broadcast=True)
+        
+        for user in online_users:
+            emit_recent_messages(user)
+
 def emit_active_users():
     active_users = User.query.all()
     active_usernames = [{
@@ -147,4 +176,4 @@ def emit_active_users():
 if __name__ == '__main__':
     with app.app_context():
         db.create_all() 
-    socketio.run(app)
+    socketio.run(app, host='0.0.0.0', port=5000)

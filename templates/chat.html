@@ -6,6 +6,7 @@
     <title>Chat App</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
 </head>
 <body class="dark-mode">
     <div class="chat-container">
@@ -29,6 +30,7 @@
         </div>
         <div class="chat-box">
             <div class="messages" id="messages">
+                <span class="delete-icon" onclick="confirmDeleteMessage(message.id)">&#128465;</span>
 
             </div>
             <div class="message-input">
