@@ -146,6 +146,8 @@ body.dark-mode {
 
 .system-message strong {
     color: rgb(184, 99, 99); 
+    font-style: italic; 
+    font-family: 'Corbel', cursive;
 }
 
 .system-message > div:first-child {
@@ -155,4 +157,8 @@ body.dark-mode {
 
 .system-message > div:last-child {
     margin-top: 4px; 
+}
+
+.timestamp {
+    font-style: italic;
 }
