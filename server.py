@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for
-from flask_socketio import SocketIO, send
+from flask_socketio import SocketIO, send, emit
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from datetime import datetime
@@ -11,6 +11,7 @@ db = SQLAlchemy(app)
 socketio = SocketIO(app)
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
+online_users = {}
 
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -25,7 +26,7 @@ def load_user(user_id):
 @app.route('/')
 @login_required
 def index():
-    return render_template('chat.html')  
+    return render_template('chat.html', username=current_user.username) 
 
 @app.route("/login", methods=['GET', 'POST'])
 def login():
@@ -48,7 +49,8 @@ def logout():
 @socketio.on('connect')
 def handle_connect():
     if current_user.is_authenticated:
-
+        online_users[current_user.username] = True
+        emit_active_users()
         msg = f"{current_user.username} connected!"
     else:
 
@@ -62,11 +64,22 @@ def handle_connect():
 
     socketio.emit('system_message', system_message)
 
-@socketio.on('message')
+@socketio.on('disconnect')
+def handle_disconnect():
+    if current_user.is_authenticated:
+        online_users.pop(current_user.username, None)
+        emit_active_users()
+
+@socketio.on('chat message') 
 @login_required
 def handleMessage(msg):
     print(f'Message: {msg}')
-    send(msg, broadcast=True)
+    message_data = {
+        'user': current_user.username,
+        'text': msg,
+        'timestamp': datetime.now().strftime("%H:%M")
+    }
+    emit('chat message', message_data, broadcast=True)
 
 @socketio.on('user_active')
 def handle_user_active(data):
@@ -77,10 +90,14 @@ def handle_user_active(data):
         emit_active_users()
 
 def emit_active_users():
-    active_users = User.query.filter_by(online=True).all()
-    print("Emitting Active Users: ", active_users) 
-    active_usernames = [{ 'username': user.username, 'id': user.id } for user in active_users]
-    socketio.emit('active_users', active_usernames)
+    active_users = User.query.all()
+    active_usernames = [{
+        'username': user.username,
+        'id': user.id,
+        'online': user.online
+    } for user in active_users]
+    print("Emitting Active Users: ", active_usernames)  
+    socketio.emit('active_users', list(online_users.keys()))
 
 if __name__ == '__main__':
     with app.app_context():
