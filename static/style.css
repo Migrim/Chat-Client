@@ -46,6 +46,17 @@ body.dark-mode {
     margin: 0 0 0.5em 0;
 }
 
+.active-users {
+    padding: 1em;
+    text-align: left;
+}
+
+.active-users ul {
+    list-style: none; 
+    padding-left: 0;
+    margin: 0; 
+}
+
 .message-input button {
     flex: 1; 
     max-width: 80px; 
@@ -61,12 +72,23 @@ body.dark-mode {
     width: 100%;
     border: none;
     cursor: pointer;
+    border-radius: 8px; 
+}
+
+.sidebar-menu button:hover, 
+#image-upload:hover, 
+.message-input button:hover {
+    background-color: #555; 
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    transform: scale(1.05);
 }
 
 .chat-box {
     flex-grow: 1;
     display: flex;
     flex-direction: column;
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px; 
 }
 
 .messages {
@@ -88,6 +110,7 @@ body.dark-mode {
     background: #333;
     border: 1px solid #444;
     color: white;
+    border-radius: 8px; 
 }
 
 .image-board {
@@ -127,8 +150,10 @@ body.dark-mode {
     display: flex;
     align-items: center;
     margin-bottom: 10px;
-    position: relative; 
-    padding-right: 0px;
+}
+
+.username {
+    margin-right: 0.5em; /* Adjust the space between the username and the typing indicator */
 }
 
 .online-dot {
@@ -136,20 +161,29 @@ body.dark-mode {
     width: 10px;
     background-color: #00FF00;
     border-radius: 50%;
-    margin-right: 10px; 
+    margin-right: 10px;
 }
 
 .typing-indicator {
-    display: none; 
-    color: #888; 
-    font-size: 0.8em; 
-    white-space: nowrap; 
-    margin-left: 0; 
+    /* Hide the indicator by default */
+    display: none;
+    color: #888;
+    font-size: 0.8em;
+    margin-left: 0.5em; /* Space between the username and the indicator */
 }
 
 .user-active.typing .typing-indicator {
-    display: inline-block; 
-    animation: typingDotFlyAndFade 2s steps(4) infinite;
+    /* Show the indicator when the user is typing */
+    display: inline-block; /* This should show the indicator */
+    animation: typingDot 1.5s steps(3) infinite;
+}
+
+@keyframes typingDot {
+    /* Define the steps for the '...' animation */
+    0%, 100% { content: ''; }
+    33% { content: '.'; }
+    66% { content: '..'; }
+    99% { content: '...'; }
 }
 
 @keyframes flyAndFade {
@@ -220,25 +254,16 @@ body.dark-mode {
     50% { opacity: 0; }
 }
 
-@keyframes typingDot {
-    0%, 100% { content: ''; }
-    25% { content: '.'; }
-    50% { content: '..'; }
-    75% { content: '...'; }
-}
-
 .user-active.typing::after {
     content: ''; 
     display: inline-block;
     position: absolute; 
-    right: 10px;
+    right: 0;
     top: 50%; 
-    transform: translateY(-50%);
+    transform: translate(-100%, -50%); 
     font-size: 1.1em; 
     opacity: 1; 
     animation: typingDotFlyAndFade 2s infinite; 
-    right: 0;
-    transform: translateY(-50%) translateX(-100%); 
 }
 
 @keyframes typingDotFlyAndFade {

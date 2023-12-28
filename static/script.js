@@ -106,3 +106,50 @@ socket.on('chat message', function(message) {
     messagesContainer.appendChild(messageElement);
     messagesContainer.scrollTop = messagesContainer.scrollHeight;
 });
+
+socket.on('recent_messages', function(messages) {
+    const messagesContainer = document.getElementById('messages');
+    messagesContainer.innerHTML = ''; 
+    messages.forEach(function(message) {
+        appendMessage(message);
+    });
+    messagesContainer.scrollTop = messagesContainer.scrollHeight; 
+});
+
+(function displayRecentMessages() {
+    const messagesContainer = document.getElementById('messages');
+    recentMessages.forEach(function(message) {
+        let messageElement = document.createElement('div');
+        messageElement.className = message.user === currentUsername ? 'my-message' : 'user-message';
+
+        let userTimeDiv = document.createElement('div');
+        userTimeDiv.innerHTML = `<strong>${message.user}</strong> - <span class="timestamp">${message.timestamp}</span>`;
+
+        let messageTextDiv = document.createElement('div');
+        messageTextDiv.textContent = message.text;
+
+        messageElement.appendChild(userTimeDiv);
+        messageElement.appendChild(messageTextDiv);
+
+        messagesContainer.appendChild(messageElement);
+    });
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+})();
+
+function appendMessage(message) {
+    const messagesContainer = document.getElementById('messages');
+    
+    let messageElement = document.createElement('div');
+    messageElement.className = message.user === currentUsername ? 'my-message' : 'user-message';
+
+    let userTimeDiv = document.createElement('div');
+    userTimeDiv.innerHTML = `<strong>${message.user}</strong> - <span class="timestamp">${message.timestamp}</span>`;
+
+    let messageTextDiv = document.createElement('div');
+    messageTextDiv.textContent = message.text;
+
+    messageElement.appendChild(userTimeDiv);
+    messageElement.appendChild(messageTextDiv);
+
+    messagesContainer.appendChild(messageElement);
+}

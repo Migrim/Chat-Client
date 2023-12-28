@@ -19,14 +19,47 @@ class User(UserMixin, db.Model):
     password = db.Column(db.String(60), nullable=False)
     online = db.Column(db.Boolean, default=False)
 
+class Message(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    username = db.Column(db.String(20), nullable=False)
+    content = db.Column(db.Text, nullable=False)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def __repr__(self):
+        return f"Message('{self.username}', '{self.timestamp}')"
+
 @login_manager.user_loader
 def load_user(user_id):
     return db.session.get(User, int(user_id)) 
 
+def emit_recent_messages(username):
+    recent_messages = Message.query.order_by(Message.timestamp.desc()).limit(50).all()  
+    messages_json = [{
+        'id': message.id,
+        'user': message.username,
+        'user_id': message.user_id,
+        'text': message.content,
+        'timestamp': message.timestamp.strftime("%H:%M")
+    } for message in recent_messages]
+    
+    emit('recent_messages', messages_json[::-1], room=request.sid)
+
 @app.route('/')
 @login_required
 def index():
-    return render_template('chat.html', username=current_user.username) 
+    recent_messages = get_recent_messages() 
+    return render_template('chat.html', username=current_user.username, recent_messages=recent_messages)
+
+def get_recent_messages():
+    recent_messages = Message.query.order_by(Message.timestamp.desc()).limit(50).all()  
+    return [{
+        'id': message.id,
+        'user': message.username,
+        'user_id': message.user_id,
+        'text': message.content,
+        'timestamp': message.timestamp.strftime("%H:%M")
+    } for message in recent_messages][::-1]  
 
 @app.route("/login", methods=['GET', 'POST'])
 def login():
@@ -51,9 +84,9 @@ def handle_connect():
     if current_user.is_authenticated:
         online_users[current_user.username] = True
         emit_active_users()
+        emit_recent_messages(current_user.username)  
         msg = f"{current_user.username} connected!"
     else:
-
         msg = "Guest connected!"
 
     system_message = {
@@ -62,7 +95,7 @@ def handle_connect():
         "timestamp": datetime.now().strftime("%H:%M")  
     }
 
-    socketio.emit('system_message', system_message)
+    emit('system_message', system_message)
 
 @socketio.on('disconnect')
 def handle_disconnect():
@@ -74,10 +107,14 @@ def handle_disconnect():
 @login_required
 def handleMessage(msg):
     print(f'Message: {msg}')
+    message = Message(user_id=current_user.id, username=current_user.username, content=msg)
+    db.session.add(message)
+    db.session.commit()
+    
     message_data = {
         'user': current_user.username,
         'text': msg,
-        'timestamp': datetime.now().strftime("%H:%M")
+        'timestamp': message.timestamp.strftime("%H:%M")
     }
     emit('chat message', message_data, broadcast=True)
 
