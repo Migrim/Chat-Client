@@ -13,7 +13,11 @@
             <div class="active-users">
                 <h2>Active Users:</h2>
                 <ul id="user-list">
-                    <!-- Active users will be listed here -->
+                    <li class="user-active" data-username="Alice">
+                        <span class="online-dot"></span>
+                        <span class="username">Memmo</span>
+                        <div class="typing-indicator"><span>...</span></div> 
+                    </li>                    
                 </ul>
             </div>
             <div class="sidebar-menu">
@@ -25,7 +29,7 @@
         </div>
         <div class="chat-box">
             <div class="messages" id="messages">
-                <!-- Messages will appear here -->
+
             </div>
             <div class="message-input">
                 <input id="myMessage" autocomplete="off" placeholder="Type here to send a message">
@@ -35,7 +39,7 @@
         <div class="image-board">
             <h2>Image Board</h2>
             <div id="image-gallery">
-                <!-- Pictures here -->
+
             </div>
             <input type="file" id="image-upload">
             <button onclick="uploadImage()">Upload</button>

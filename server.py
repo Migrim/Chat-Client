@@ -81,6 +81,14 @@ def handleMessage(msg):
     }
     emit('chat message', message_data, broadcast=True)
 
+@socketio.on('typing') 
+def on_typing(username):
+    emit('user_typing', {'username': username}, broadcast=True, include_self=False)
+
+@socketio.on('stop_typing')
+def on_stop_typing(username):
+    emit('user_stop_typing', {'username': username}, broadcast=True, include_self=False)
+
 @socketio.on('user_active')
 def handle_user_active(data):
     user = User.query.get(data['user_id'])

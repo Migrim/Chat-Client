@@ -22,35 +22,65 @@ socket.on('system_message', function(message) {
     messagesContainer.appendChild(messageElement);
 });
 
-
-
 function sendMessage() {
     let messageText = document.getElementById('myMessage').value;
-    if (messageText.trim().length > 0) {  
-        socket.emit('chat message', messageText);  
+    if (messageText.trim().length > 0) {
+        socket.emit('chat message', messageText);
         document.getElementById('myMessage').value = '';
+
+        socket.emit('stop_typing', currentUsername);
     }
 }
-
 
 document.getElementById('myMessage').addEventListener('keypress', function(event) {
     if (event.key === "Enter") {
         event.preventDefault();
         sendMessage();
+    } else {
+        socket.emit('typing', currentUsername);
     }
 });
 
 socket.on('active_users', function(usernames) {
-    console.log("Active Users: ", usernames);
     var userList = document.getElementById('user-list');
-    userList.innerHTML = '';
+    userList.innerHTML = ''; // Clear existing list
     usernames.forEach(function(username) {
         var li = document.createElement('li');
         li.className = 'user-active';
-
+        li.setAttribute('data-username', username); 
         li.innerHTML = `<span class="online-dot" style="background-color: #00FF00;"></span>${username}`;
         userList.appendChild(li);
     });
+});
+
+let typingTimeout; 
+
+document.getElementById('myMessage').addEventListener('keydown', function() {
+    clearTimeout(typingTimeout);
+
+    socket.emit('typing', currentUsername);
+
+    typingTimeout = setTimeout(function() {
+        socket.emit('stop_typing', currentUsername);  
+    }, 3000);  
+});
+
+socket.on('user_typing', function(data) {
+    let userListItem = document.querySelector(`#user-list li[data-username="${data.username}"]`);
+    if (userListItem) {
+        userListItem.classList.add('typing');
+        clearTimeout(typingTimeout); 
+        typingTimeout = setTimeout(function() { 
+            userListItem.classList.remove('typing');
+        }, 3000);
+    }
+});
+
+socket.on('user_stop_typing', function(data) {
+    let userListItem = document.querySelector(`#user-list li[data-username="${data.username}"]`);
+    if (userListItem) {
+        userListItem.classList.remove('typing');
+    }
 });
 
 socket.on('chat message', function(message) {

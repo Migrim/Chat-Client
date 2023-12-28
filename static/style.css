@@ -1,4 +1,4 @@
-/* Base Styles */
+
 body.dark-mode {
     font-family: 'Roboto', sans-serif;
     background-color: #333;
@@ -7,7 +7,7 @@ body.dark-mode {
     margin: 0;
     padding: 0;
     display: flex;
-    height: 100vh; /* Full viewport height */
+    height: 100vh; 
     align-items: stretch;
     justify-content: center;
     overflow: hidden;
@@ -15,27 +15,27 @@ body.dark-mode {
 
 .chat-container {
     display: flex;
-    width: 95%; /* Adjusted for full width with some margin */
-    height: 90vh; /* Adjust height if needed */
+    width: 95%; 
+    height: 90vh; 
     border-radius: 10px;
     overflow: hidden;
     box-shadow: 0 0 10px rgba(0,0,0,0.5);
-    margin: 5vh auto; /* Centering with vertical margin */
+    margin: 5vh auto;
 }
 
 .sidebar {
     width: 20%;
     background: #222;
     display: flex;
-    flex-direction: column; /* keeps items in a vertical line */
-    justify-content: space-between; /* separates active users and menu */
+    flex-direction: column;
+    justify-content: space-between;
     overflow-y: auto;
-    height: 90vh; /* Adjust if necessary to fit the height of chat-container */
+    height: 90vh; 
 }
 
 .sidebar-menu {
     padding: 1em;
-    margin-top: auto; /* pushes the menu to the bottom */
+    margin-top: auto;
 }
 
 .active-users, .sidebar-menu, .image-board {
@@ -82,7 +82,7 @@ body.dark-mode {
 }
 
 .message-input input {
-    flex: 5; /* Allocate more space to input than button */
+    flex: 5;
     padding: 10px;
     margin-right: 10px;
     background: #333;
@@ -91,7 +91,7 @@ body.dark-mode {
 }
 
 .image-board {
-    width: 15%; /* Adjusted for full width */
+    width: 15%; 
     background: #222;
     padding: 10px;
     overflow-y: auto;
@@ -107,20 +107,18 @@ body.dark-mode {
     overflow-y: auto;
 }
 
-/* Responsive adjustments */
 @media (max-width: 768px) {
     .sidebar, .image-board {
-        width: 25%; /* Adjusted width for smaller screens */
+        width: 25%; 
     }
 }
 
 @media (max-width: 480px) {
-    /* Hide sidebar and image board on smaller screens */
     .sidebar, .image-board {
         display: none;
     }
     .chat-container {
-        width: 98%; /* Adjusted for smaller screens */
+        width: 98%; 
         margin: 1% auto;
     }
 }
@@ -128,7 +126,9 @@ body.dark-mode {
 .user-active {
     display: flex;
     align-items: center;
-    margin-bottom: 5px;
+    margin-bottom: 10px;
+    position: relative; 
+    padding-right: 0px;
 }
 
 .online-dot {
@@ -136,7 +136,20 @@ body.dark-mode {
     width: 10px;
     background-color: #00FF00;
     border-radius: 50%;
-    margin-right: 5px;
+    margin-right: 10px; 
+}
+
+.typing-indicator {
+    display: none; 
+    color: #888; 
+    font-size: 0.8em; 
+    white-space: nowrap; 
+    margin-left: 0; 
+}
+
+.user-active.typing .typing-indicator {
+    display: inline-block; 
+    animation: typingDotFlyAndFade 2s steps(4) infinite;
 }
 
 @keyframes flyAndFade {
@@ -190,4 +203,63 @@ body.dark-mode {
 .my-message {
     margin-bottom: 10px;
     animation: flyAndFade 0.5s ease-out;
+}
+
+.typing::after {
+    content: '...';
+    animation: typingIndicator 1.5s infinite;
+}
+
+@keyframes typingIndicator {
+    0% { opacity: 0; }
+    50% { opacity: 1; }
+    100% { opacity: 0; }
+}
+
+@keyframes blink {
+    50% { opacity: 0; }
+}
+
+@keyframes typingDot {
+    0%, 100% { content: ''; }
+    25% { content: '.'; }
+    50% { content: '..'; }
+    75% { content: '...'; }
+}
+
+.user-active.typing::after {
+    content: ''; 
+    display: inline-block;
+    position: absolute; 
+    right: 10px;
+    top: 50%; 
+    transform: translateY(-50%);
+    font-size: 1.1em; 
+    opacity: 1; 
+    animation: typingDotFlyAndFade 2s infinite; 
+    right: 0;
+    transform: translateY(-50%) translateX(-100%); 
+}
+
+@keyframes typingDotFlyAndFade {
+    0%, 100% {
+        content: ''; 
+        opacity: 0; 
+        transform: translateY(-50%) translateX(-100%); 
+    }
+    25% {
+        content: '.';
+        opacity: 1; 
+        transform: translateY(-50%) translateX(0); 
+    }
+    50% {
+        content: '..';
+        opacity: 1; 
+        transform: translateY(-50%) translateX(0);
+    }
+    75% {
+        content: '...';
+        opacity: 1;
+        transform: translateY(-50%) translateX(0); 
+    }
 }
