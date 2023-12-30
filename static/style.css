@@ -114,7 +114,7 @@ body.dark-mode {
 }
 
 .image-board {
-    width: 15%; 
+    width: 25%; 
     background: #222;
     padding: 10px;
     overflow-y: auto;

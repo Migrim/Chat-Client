@@ -3,6 +3,9 @@ from flask_socketio import SocketIO, send, emit
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from datetime import datetime
+from werkzeug.utils import secure_filename
+import os
+from flask import jsonify
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'LKDNJZFGVBQWOIDH'
@@ -28,6 +31,16 @@ class Message(db.Model):
 
     def __repr__(self):
         return f"Message('{self.username}', '{self.timestamp}')"
+    
+class Image(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    username = db.Column(db.String(20), nullable=False)
+    image_url = db.Column(db.String(300), nullable=False)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def __repr__(self):
+        return f"Image('{self.id}', '{self.username}', '{self.image_url}')"
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -123,6 +136,26 @@ def handleMessage(msg):
         'timestamp': message.timestamp.strftime("%H:%M")
     }
     emit('new_chat_message', message_data, broadcast=True)
+
+@app.route('/upload_image', methods=['POST'])
+@login_required
+def upload_image():
+    if 'image' in request.files:
+        image = request.files['image']
+        if image.filename != '':
+            filename = secure_filename(image.filename)
+            image_path = os.path.join('static', 'user_upload', filename)
+            image.save(image_path)
+            
+            web_image_path = url_for('static', filename=f'user_upload/{filename}')
+
+            new_image = Image(user_id=current_user.id, username=current_user.username, image_url=web_image_path)
+            db.session.add(new_image)
+            db.session.commit()
+
+            socketio.emit('new_image', {'image_id': new_image.id, 'image_url': web_image_path}, broadcast=True)
+
+    return redirect(url_for('index'))
 
 @socketio.on('typing') 
 def on_typing(username):

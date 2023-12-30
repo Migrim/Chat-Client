@@ -175,3 +175,31 @@ function handleRecentMessages(messages) {
     });
     messagesContainer.scrollTop = messagesContainer.scrollHeight;
 }
+
+document.getElementById('image-upload-form').onsubmit = function(e) {
+    e.preventDefault();
+    var formData = new FormData(this);
+    fetch('/upload_image', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if(data.image_url) {
+            var imageGallery = document.getElementById('image-gallery');
+            var img = document.createElement('img');
+            img.src = data.image_url;
+            imageGallery.appendChild(img);
+        } else {
+            // Handle error
+            console.error("Error uploading image");
+        }
+    });
+};
+
+socket.on('new_image', function(data) {
+    var imageGallery = document.getElementById('image-gallery');
+    var img = document.createElement('img');
+    img.src = data.image_url; 
+    imageGallery.appendChild(img);
+});

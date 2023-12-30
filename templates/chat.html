@@ -43,8 +43,10 @@
             <div id="image-gallery">
 
             </div>
-            <input type="file" id="image-upload">
-            <button onclick="uploadImage()">Upload</button>
+            <form id="image-upload-form" action="/upload_image" method="post" enctype="multipart/form-data">
+                <input type="file" id="image-upload" name="image">
+                <button type="submit">Upload</button>
+            </form>            
         </div>
     </div>
 
