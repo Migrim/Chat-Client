@@ -95,7 +95,7 @@ def handle_connect():
         "timestamp": datetime.now().strftime("%H:%M")  
     }
 
-    emit('system_message', system_message)
+    emit('system_message', system_message, broadcast=True)
 
 @socketio.on('request_recent_messages')
 @login_required
@@ -117,11 +117,12 @@ def handleMessage(msg):
     db.session.commit()
     
     message_data = {
+        'id': message.id,
         'user': current_user.username,
         'text': msg,
         'timestamp': message.timestamp.strftime("%H:%M")
     }
-    emit('chat message', message_data, broadcast=True)
+    emit('new_chat_message', message_data, broadcast=True)
 
 @socketio.on('typing') 
 def on_typing(username):
@@ -142,11 +143,11 @@ def handle_user_active(data):
 @app.route("/delete_message/<int:message_id>", methods=['POST'])
 @login_required
 def delete_message(message_id):
-    message = Message.query.get(message_id)
-    if message.user_id == current_user.id:  
-        db.session.delete(message)
+    message = Message.query.get_or_404(message_id)
+    if message and message.user_id == current_user.id:
+        message.content = "Deleted by user"
         db.session.commit()
-        emit('message_deleted', {'message_id': message_id}, broadcast=True)
+        emit('message_deleted', {'message_id': message.id, 'new_content': "Deleted by user"}, broadcast=True)
     return redirect(url_for('index'))
 
 @socketio.on('delete_message')
@@ -155,13 +156,10 @@ def handle_delete_message(json):
     message_id = json.get('message_id')
     message = Message.query.get(message_id)
     if message and message.user_id == current_user.id:
-        message.content = "Deleted"  
+        message.content = "Deleted by user"
         db.session.commit()
-        
-        emit('message_deleted', {'message_id': message_id}, broadcast=True)
-        
-        for user in online_users:
-            emit_recent_messages(user)
+
+        emit('refresh_messages', broadcast=True)
 
 def emit_active_users():
     active_users = User.query.all()

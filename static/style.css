@@ -388,6 +388,17 @@ body.dark-mode {
 }
 
 .deleted-message {
+    color: #aaa;
     font-style: italic;
-    color: #757575;
+}
+
+.my-message.new, .user-message.new {
+    /* Apply your animation only to new messages */
+    animation: flyAndFade 0.5s ease-out;
+}
+
+.deleted { /* class added to deleted messages */
+    color: #ccc;
+    font-style: italic;
+    text-decoration: line-through;
 }
