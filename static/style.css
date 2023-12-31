@@ -388,17 +388,44 @@ body.dark-mode {
 }
 
 .deleted-message {
-    color: #aaa;
+    border: 1px solid #aaa; 
+    padding: 5px;
+    border-radius: 4px;
+    position: relative;
+    font-style: italic;
+    display: inline-block;
+    margin-bottom: 11px; 
+}
+
+.deleted-message strong {
+    color: #e74c3c; 
+}
+
+.deleted-message:hover::after {
+    content: attr(data-deleted-by); 
+    position: absolute;
+    bottom: -20px; 
+    left: 0;
+    font-size: 0.8em;
+    color: #666;
+}
+
+.deleted-info {
+    display: block; 
+    color: #ccc; 
     font-style: italic;
 }
 
 .my-message.new, .user-message.new {
-    /* Apply your animation only to new messages */
     animation: flyAndFade 0.5s ease-out;
 }
 
-.deleted { /* class added to deleted messages */
+.deleted { 
     color: #ccc;
     font-style: italic;
     text-decoration: line-through;
+}
+
+.hidden-message {
+    color: #333; 
 }

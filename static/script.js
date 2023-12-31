@@ -89,10 +89,12 @@ socket.on('chat message', function(message) {
 
 socket.on('recent_messages', function(messages) {
     const messagesContainer = document.getElementById('messages');
-    messagesContainer.innerHTML = '';  // Clear the messages container before appending new messages
+    messagesContainer.innerHTML = '';
+    knownMessageIds.clear();  // Clear the set to accept the new set of message IDs
+
     messages.forEach(function(message) {
-        appendMessage(message, !knownMessageIds.has(message.id));
-        knownMessageIds.add(message.id);  // Add message ID to the known set
+        appendMessage(message, true); 
+        knownMessageIds.add(message.id);
     });
     messagesContainer.scrollTop = messagesContainer.scrollHeight;
 });
@@ -100,6 +102,7 @@ socket.on('recent_messages', function(messages) {
 function createMessageElement(message, className) {
     let messageElement = document.createElement('div');
     messageElement.className = className;
+    messageElement.setAttribute('data-message-id', message.id);
     let userTimeDiv = document.createElement('div');
     userTimeDiv.innerHTML = `<strong>${message.user}</strong> - <span class="timestamp">${message.timestamp}</span>`;
     let messageTextDiv = document.createElement('div');
@@ -112,23 +115,25 @@ function createMessageElement(message, className) {
 function appendMessage(message, isNew) {
     const messagesContainer = document.getElementById('messages');
     let messageElement = createMessageElement(message, message.user === currentUsername ? 'my-message' : 'user-message');
-    
-    // If the message is new, add the 'new' class
+
     if (isNew) {
         messageElement.classList.add('new');
     }
 
-    if (message.user === currentUsername) {
-        let deleteIcon = document.createElement('span');
-        deleteIcon.classList.add('delete-icon');
-        deleteIcon.textContent = '🗑️';
-        deleteIcon.onclick = function() { deleteMessage(message.id); };
+    let deleteIcon = document.createElement('span');
+    deleteIcon.classList.add('delete-icon');
+    deleteIcon.textContent = '🗑️';
+    deleteIcon.onclick = function() { deleteMessage(message.id); };
+
+    if (message.text !== "Message deleted by user") {
         messageElement.appendChild(deleteIcon);
     }
 
-    if (message.text === "Deleted by user") {
-        let messageTextDiv = messageElement.querySelector('div:last-child'); 
-        messageTextDiv.classList.add('deleted');
+    if (message.text === "Message deleted by user") {
+        messageElement.classList.add('deleted-message');
+        messageElement.classList.remove('my-message');
+    } else {
+        messageElement.classList.remove('deleted-message');
     }
 
     messagesContainer.appendChild(messageElement);
@@ -140,12 +145,14 @@ function deleteMessage(messageId) {
 }
 
 socket.on('message_deleted', function(data) {
-    let messageElement = document.getElementById('message-' + data.message_id);
+    let messageElement = document.querySelector(`[data-message-id="${data.message_id}"]`);
     if (messageElement) {
+        // Option 1: Change the text to be the same color as the background
         let textDiv = messageElement.querySelector('div:last-child');
-        textDiv.textContent = data.new_content;
-        messageElement.classList.add('deleted-message');
+        textDiv.textContent = ''; // Clear the text
+        textDiv.classList.add('hidden-message'); // Add this class to make any text the same color as the background if needed
     }
+    socket.emit('request_recent_messages', currentUsername);
 });
 
 socket.on('refresh_messages', function() {
@@ -154,7 +161,7 @@ socket.on('refresh_messages', function() {
 
 socket.on('new_chat_message', function(message) {
     appendMessage(message, !knownMessageIds.has(message.id));
-    knownMessageIds.add(message.id); // Add message ID to the known set
+    knownMessageIds.add(message.id); 
 });
 
 function appendSystemMessage(message) {

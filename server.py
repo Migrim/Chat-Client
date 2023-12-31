@@ -178,9 +178,9 @@ def handle_user_active(data):
 def delete_message(message_id):
     message = Message.query.get_or_404(message_id)
     if message and message.user_id == current_user.id:
-        message.content = "Deleted by user"
+        message.content = "Message deleted by user"
         db.session.commit()
-        emit('message_deleted', {'message_id': message.id, 'new_content': "Deleted by user"}, broadcast=True)
+        emit('message_deleted', {'message_id': message.id, 'new_content': "Message deleted by user"}, broadcast=True)
     return redirect(url_for('index'))
 
 @socketio.on('delete_message')
@@ -189,7 +189,7 @@ def handle_delete_message(json):
     message_id = json.get('message_id')
     message = Message.query.get(message_id)
     if message and message.user_id == current_user.id:
-        message.content = "Deleted by user"
+        message.content = "Message deleted by user"
         db.session.commit()
 
         emit('refresh_messages', broadcast=True)
