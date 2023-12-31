@@ -99,22 +99,41 @@ socket.on('recent_messages', function(messages) {
     messagesContainer.scrollTop = messagesContainer.scrollHeight;
 });
 
-function createMessageElement(message, className) {
-    let messageElement = document.createElement('div');
-    messageElement.className = className;
-    messageElement.setAttribute('data-message-id', message.id);
-    let userTimeDiv = document.createElement('div');
-    userTimeDiv.innerHTML = `<strong>${message.user}</strong> - <span class="timestamp">${message.timestamp}</span>`;
-    let messageTextDiv = document.createElement('div');
-    messageTextDiv.textContent = message.text;
-    messageElement.appendChild(userTimeDiv);
-    messageElement.appendChild(messageTextDiv);
-    return messageElement;
-}
+let lastUser = null;
 
 function appendMessage(message, isNew) {
     const messagesContainer = document.getElementById('messages');
-    let messageElement = createMessageElement(message, message.user === currentUsername ? 'my-message' : 'user-message');
+    let lastMessage = messagesContainer.lastElementChild;
+    let currentTime = new Date(message.timestamp);
+
+    let messageElement = document.createElement('div');
+    messageElement.className = message.user === currentUsername ? 'my-message' : 'user-message';
+    messageElement.setAttribute('data-username', message.user);
+    messageElement.setAttribute('data-timestamp', message.timestamp);
+
+    // If the last user is different from the current, update the last message of the previous user
+    if (lastUser && lastUser !== message.user) {
+        if (lastMessage) {
+            lastMessage.classList.add('non-consecutive-message');
+        }
+    }
+
+    //if (lastUser === message.user) {
+    //    messageElement.classList.add('consecutive-message');
+    //} else {
+    //    messageElement.classList.add('non-consecutive-message');
+    //    lastUser = message.user;
+    //}
+
+    if (!lastMessage || lastMessage.getAttribute('data-username') !== message.user) {
+        let userTimeDiv = document.createElement('div');
+        userTimeDiv.innerHTML = `<strong>${message.user}</strong> - <span class="timestamp">${message.timestamp}</span>`;
+        messageElement.appendChild(userTimeDiv);
+    }
+
+    let messageTextDiv = document.createElement('div');
+    messageTextDiv.textContent = message.text;
+    messageElement.appendChild(messageTextDiv);
 
     if (isNew) {
         messageElement.classList.add('new');
@@ -140,6 +159,7 @@ function appendMessage(message, isNew) {
     messagesContainer.scrollTop = messagesContainer.scrollHeight;
 }
 
+
 function deleteMessage(messageId) {
     socket.emit('delete_message', { 'message_id': messageId });
 }
@@ -147,7 +167,7 @@ function deleteMessage(messageId) {
 socket.on('message_deleted', function(data) {
     let messageElement = document.querySelector(`[data-message-id="${data.message_id}"]`);
     if (messageElement) {
-        // Option 1: Change the text to be the same color as the background
+
         let textDiv = messageElement.querySelector('div:last-child');
         textDiv.textContent = ''; // Clear the text
         textDiv.classList.add('hidden-message'); // Add this class to make any text the same color as the background if needed
@@ -210,3 +230,20 @@ socket.on('new_image', function(data) {
     img.src = data.image_url; 
     imageGallery.appendChild(img);
 });
+
+function createMessageElement(message, className) {
+    let messageElement = document.createElement('div');
+    messageElement.className = className;
+    
+    let userTimeDiv = document.createElement('div');
+    userTimeDiv.innerHTML = `<strong>${message.user}</strong> - <span class="timestamp">${message.timestamp}</span>`;
+    
+    let messageTextDiv = document.createElement('div');
+    messageTextDiv.textContent = message.text;
+    
+    messageElement.appendChild(userTimeDiv);
+    messageElement.appendChild(messageTextDiv);
+    
+    return messageElement;
+}
+

@@ -381,11 +381,7 @@ body.dark-mode {
     cursor: pointer;
 }
 
-.system-message,
-.user-message,
-.my-message {
-    margin-bottom: 11px; 
-}
+
 
 .deleted-message {
     border: 1px solid #aaa; 
@@ -428,4 +424,12 @@ body.dark-mode {
 
 .hidden-message {
     color: #333; 
+}
+
+.consecutive-message {
+    margin-top: 2px;
+}
+
+.non-consecutive-message {
+    margin-top: 11px;
 }
