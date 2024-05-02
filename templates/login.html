@@ -11,8 +11,8 @@
             height: 100%;
             margin: 0;
             font-family: Arial, sans-serif;
-            background-color: #333; /* Dark background */
-            color: white; /* Light text */
+            background-color: #1a1a1a; /* Dark background */
+            color: #fff; /* Light text */
             display: flex;
             justify-content: center;
             align-items: center;
@@ -20,55 +20,80 @@
 
         /* Style the form */
         form {
-            border: 1px solid #888;
-            padding: 20px;
+            border: 1px solid #444;
+            padding: 30px;
             border-radius: 10px;
-            background: #444; /* Slightly lighter form background */
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); /* Soft shadow */
+            background: #333; /* Slightly lighter form background */
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5); /* Soft shadow */
             width: 300px; /* Fixed width, you can change as needed */
+            animation: fadeIn 0.5s ease-out; /* Fade-in animation */
         }
 
         /* Style inputs and button */
         input[type=text], input[type=password] {
             width: calc(100% - 22px); /* Full width minus padding and border */
             padding: 10px;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
             border-radius: 5px;
             border: 1px solid #555;
-            background: #555;
-            color: white;
+            background: #444;
+            color: #fff;
+            outline: none; /* Remove outline */
         }
 
         input[type=submit] {
             width: 100%;
-            padding: 10px;
+            padding: 12px;
             border-radius: 5px;
-            border: 1px solid #555;
-            background: #666;
-            color: white;
+            border: none;
+            background: #555;
+            color: #fff;
             cursor: pointer;
+            transition: background 0.3s ease;
         }
 
         input[type=submit]:hover {
             background: #777;
         }
+
+        label {
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        /* Fade-in animation */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
     </style>
 </head>
 <body>
-    <form action="" method="post">
+    <form action="" method="post" id="login-form" onsubmit="submitForm()">
         <div>
             <label for="username">Username:</label>
-            <input type="text" id="username" name="username">
+            <input type="text" id="username" name="username" required>
         </div>
         <div>
             <label for="password">Password:</label>
-            <input type="password" id="password" name="password">
+            <input type="password" id="password" name="password" required>
         </div>
         <div>
             <input type="submit" value="Login">
         </div>
     </form>
+
+    <script>
+        function submitForm() {
+            // Add slide-up animation when submitting the form
+            document.getElementById('login-form').style.animation = 'slideUp 0.5s forwards';
+        }
+    </script>
 </body>
-
-
 </html>
